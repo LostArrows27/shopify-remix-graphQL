@@ -30,3 +30,33 @@ model Session {
   collaborator  Boolean?  @default(false)
   emailVerified Boolean?  @default(false)
 }
+
+model PricingRule {
+  id       String  @id @default(cuid())
+  shop     String
+  name     String
+  priority Int     @default(0) // 0-99
+  status   Boolean @default(true)
+
+  applicationType String // "all", "specific_products", "collections", "tags"
+  applicationData String // JSON of array of ID
+
+  customPriceType  String // "fixed", "decrease_amount", "decrease_percentage"
+  customPriceValue Decimal
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([shop, name])
+  @@index([shop, status, priority])
+}
+
+model ShopifyTag {
+  id        String   @id @default(cuid())
+  shop      String
+  name      String
+  createdAt DateTime @default(now())
+
+  @@unique([shop, name])
+  @@index([shop])
+}
