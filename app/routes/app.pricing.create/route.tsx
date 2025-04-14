@@ -21,6 +21,7 @@ import { getAmountPrefix } from "app/utils/get_amount_prefix";
 import { useCallback, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { z } from "zod";
 
 // TODO: add confirm if leave page
 
@@ -48,6 +49,7 @@ export const Create = () => {
     formState: { errors },
     watch,
     clearErrors,
+    trigger,
   } = useForm<PricingRuleFormData>({
     resolver: zodResolver(pricingRuleSchema),
     defaultValues: {
@@ -102,12 +104,15 @@ export const Create = () => {
     }
   }, [blocker, toggleModal]);
 
-  // NOTE: clear errors when price type not % 
+  // NOTE: clear errors when price type not %
   useEffect(() => {
-    if (errors.amount && currentPriceType !== "decrease_percentage") {
+    if (
+      errors.amount?.type === z.ZodIssueCode.custom &&
+      currentPriceType !== "decrease_percentage"
+    ) {
       clearErrors("amount");
     }
-  }, [currentPriceType, errors.amount, clearErrors]);
+  }, [currentPriceType, errors.amount, clearErrors, trigger]);
 
   return (
     <Page
