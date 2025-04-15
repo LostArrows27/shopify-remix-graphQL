@@ -11,15 +11,15 @@ import {
   Thumbnail,
 } from "@shopify/polaris";
 import { SearchIcon, ImageIcon, XIcon } from "@shopify/polaris-icons";
-import type { ProductType, SelectedType } from "app/types/app";
+import type { CollectionType, SelectedType } from "app/types/app";
 import { useCallback, useEffect, useState } from "react";
 import { useDebounce } from "use-debounce";
 import tagImage from "../../assets/images/tag.svg";
 
-const SearchProduct = () => {
-  const [selectedProductIds, setSelectedProductIds] = useState<SelectedType[]>(
-    [],
-  );
+const SearchCollection = () => {
+  const [selectedCollectionIds, setSelectedCollectionIds] = useState<
+    SelectedType[]
+  >([]);
   const [query, setQuery] = useState<string>("");
 
   const [debouncedQuery] = useDebounce(query, 500);
@@ -34,11 +34,11 @@ const SearchProduct = () => {
   const pickProduct = useCallback(
     async (query?: string) => {
       const response = await shopify.resourcePicker({
-        type: "product",
+        type: "collection",
         action: "select",
         multiple: true,
         query: query,
-        selectionIds: selectedProductIds,
+        selectionIds: selectedCollectionIds,
         filter: {
           variants: false,
         },
@@ -46,18 +46,15 @@ const SearchProduct = () => {
 
       if (!response) return;
 
-      setSelectedProductIds(
-        (response as ProductType[]).map((product) => ({
+      setSelectedCollectionIds(
+        (response as CollectionType[]).map((product) => ({
           id: product.id,
           title: product.title,
-          imageUrl:
-            product.images.length > 0
-              ? product.images[0]?.originalSrc
-              : undefined,
+          imageUrl: product.image ? product.image.originalSrc : undefined,
         })),
       );
     },
-    [selectedProductIds],
+    [selectedCollectionIds],
   );
 
   return (
@@ -68,7 +65,7 @@ const SearchProduct = () => {
           value={query}
           onChange={(value) => setQuery(value)}
           prefix={<Icon source={SearchIcon} tone="base" />}
-          placeholder="Search products"
+          placeholder="Search collections"
           autoComplete="off"
           size="medium"
           connectedRight={
@@ -83,7 +80,7 @@ const SearchProduct = () => {
         />
       </Box>
       <Box paddingBlockEnd="200">
-        {selectedProductIds.length === 0 ? (
+        {selectedCollectionIds.length === 0 ? (
           <Bleed>
             <BlockStack inlineAlign="center">
               <img
@@ -98,17 +95,17 @@ const SearchProduct = () => {
             </BlockStack>
             <BlockStack align="center" inlineAlign="center" gap="050">
               <Text variant="bodyMd" as="p">
-                There are no products selected.
+                There are no collections selected.
               </Text>
               <Text variant="bodyMd" as="p">
-                Search or browse to add products.
+                Search or browse to add collections.
               </Text>
             </BlockStack>
           </Bleed>
         ) : (
           <ResourceList
-            resourceName={{ singular: "product", plural: "products" }}
-            items={selectedProductIds}
+            resourceName={{ singular: "collection", plural: "collections" }}
+            items={selectedCollectionIds}
             renderItem={(item) => {
               return (
                 <ResourceItem
@@ -140,8 +137,10 @@ const SearchProduct = () => {
                       icon={XIcon}
                       accessibilityLabel="Add theme"
                       onClick={() => {
-                        setSelectedProductIds((prev) =>
-                          prev.filter((product) => product.id !== item.id),
+                        setSelectedCollectionIds((prev) =>
+                          prev.filter(
+                            (collection) => collection.id !== item.id,
+                          ),
                         );
                       }}
                     />
@@ -156,4 +155,4 @@ const SearchProduct = () => {
   );
 };
 
-export default SearchProduct;
+export default SearchCollection;
