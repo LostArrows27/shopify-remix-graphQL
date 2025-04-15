@@ -13,6 +13,7 @@ import {
   ChoiceList,
   Modal,
 } from "@shopify/polaris";
+import SearchProduct from "app/components/rule-form/search_product";
 import { appliedProductTypeList, priceTypeList } from "app/constants/constants";
 import { pricingRuleSchema } from "app/schema/pricing_rule_schema";
 import type { PricingRuleFormData } from "app/types/app";
@@ -83,7 +84,7 @@ export const Create = () => {
   const renderChildren = useCallback((type: AppliedProductType): ReactNode => {
     switch (type) {
       case "specific_products":
-        return <div>specific_products</div>;
+        return <SearchProduct />;
       case "collections":
         return <div>collections</div>;
       case "tags":
@@ -141,7 +142,7 @@ export const Create = () => {
                       <TextField
                         label="Name"
                         error={errors.name?.message}
-                        autoComplete="off"
+                        autoComplete="on"
                         {...field}
                       />
                     )}
@@ -153,7 +154,7 @@ export const Create = () => {
                       <TextField
                         label="Priority"
                         type="number"
-                        autoComplete="off"
+                        autoComplete="on"
                         value={field.value + "" || ""}
                         onChange={field.onChange}
                         error={errors.priority?.message}
@@ -252,7 +253,7 @@ export const Create = () => {
                         prefix={getAmountPrefix(currentPriceType)}
                         value={field.value + "" || ""}
                         onChange={field.onChange}
-                        autoComplete="off"
+                        autoComplete="on"
                         error={errors.amount?.message}
                       />
                     )}
