@@ -13,6 +13,7 @@ import {
   ChoiceList,
   Modal,
 } from "@shopify/polaris";
+import SearchCollection from "app/components/rule-form/search_collection";
 import SearchProduct from "app/components/rule-form/search_product";
 import { appliedProductTypeList, priceTypeList } from "app/constants/constants";
 import { pricingRuleSchema } from "app/schema/pricing_rule_schema";
@@ -24,7 +25,17 @@ import type { ReactNode } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 
-// TODO: add confirm if leave page
+import tagImage from "../../assets/images/tag.svg";
+
+export function links() {
+  return [
+    {
+      rel: "preload",
+      href: tagImage,
+      as: "image",
+    },
+  ];
+}
 
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
@@ -86,7 +97,7 @@ export const Create = () => {
       case "specific_products":
         return <SearchProduct />;
       case "collections":
-        return <div>collections</div>;
+        return <SearchCollection />;
       case "tags":
         return <div>tags</div>;
       default:
