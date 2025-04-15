@@ -26,6 +26,7 @@ import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import tagImage from "../../assets/images/tag.svg";
+import SearchTag from "app/components/rule-form/search_tag";
 
 export function links() {
   return [
@@ -99,7 +100,7 @@ export const Create = () => {
       case "collections":
         return <SearchCollection />;
       case "tags":
-        return <div>tags</div>;
+        return <SearchTag />;
       default:
         return null;
     }
