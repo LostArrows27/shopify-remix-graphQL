@@ -39,7 +39,8 @@ model PricingRule {
   status   Boolean @default(true)
 
   applicationType String // "all", "specific_products", "collections", "tags"
-  applicationData String // JSON of array of ID
+  
+  ruleApplications RuleApplication[] 
 
   customPriceType  String // "fixed", "decrease_amount", "decrease_percentage"
   customPriceValue Decimal
@@ -49,6 +50,22 @@ model PricingRule {
 
   @@unique([shop, name])
   @@index([shop, status, priority])
+}
+
+model RuleApplication {
+  id           String     @id @default(cuid())
+  
+  pricingRule   PricingRule @relation(fields: [pricingRuleId], references: [id], onDelete: Cascade)
+  pricingRuleId String
+  
+  entityType    String     // "product", "collection", "tag"
+  entityId      String     // ID of the entity (product ID, collection ID, tag name)
+  
+  createdAt     DateTime   @default(now())
+
+  @@unique([pricingRuleId, entityType, entityId])
+  @@index([entityType, entityId])
+  @@index([pricingRuleId])
 }
 
 model ShopifyTag {
