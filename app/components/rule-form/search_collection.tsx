@@ -10,11 +10,15 @@ import {
   TextField,
   Thumbnail,
 } from "@shopify/polaris";
-import { SearchIcon, ImageIcon, XIcon } from "@shopify/polaris-icons";
+import {
+  SearchIcon,
+  ImageIcon,
+  XIcon,
+  CollectionIcon,
+} from "@shopify/polaris-icons";
 import type { CollectionType, SelectedType } from "app/types/app";
 import { useCallback, useEffect, useState } from "react";
 import { useDebounce } from "use-debounce";
-import tagImage from "../../assets/images/tag.svg";
 
 const SearchCollection = () => {
   const [selectedCollectionIds, setSelectedCollectionIds] = useState<
@@ -83,13 +87,11 @@ const SearchCollection = () => {
         {selectedCollectionIds.length === 0 ? (
           <Bleed>
             <BlockStack inlineAlign="center">
-              <img
-                alt="tag-image"
-                src={tagImage}
+              <CollectionIcon
+                fill="#8a8a8a"
                 style={{
-                  width: "50px",
-                  height: "50px",
-                  margin: "20px 0",
+                  width: "60px",
+                  margin: "16px 0",
                 }}
               />
             </BlockStack>

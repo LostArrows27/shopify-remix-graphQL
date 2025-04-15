@@ -10,11 +10,10 @@ import {
   TextField,
   Thumbnail,
 } from "@shopify/polaris";
-import { SearchIcon, ImageIcon, XIcon } from "@shopify/polaris-icons";
+import { SearchIcon, ImageIcon, XIcon, ProductAddIcon } from "@shopify/polaris-icons";
 import type { ProductType, SelectedType } from "app/types/app";
 import { useCallback, useEffect, useState } from "react";
 import { useDebounce } from "use-debounce";
-import tagImage from "../../assets/images/tag.svg";
 
 const SearchProduct = () => {
   const [selectedProductIds, setSelectedProductIds] = useState<SelectedType[]>(
@@ -86,13 +85,11 @@ const SearchProduct = () => {
         {selectedProductIds.length === 0 ? (
           <Bleed>
             <BlockStack inlineAlign="center">
-              <img
-                alt="tag-image"
-                src={tagImage}
+              <ProductAddIcon
+                fill="#8a8a8a"
                 style={{
-                  width: "50px",
-                  height: "50px",
-                  margin: "20px 0",
+                  width: "60px",
+                  margin: "16px 0",
                 }}
               />
             </BlockStack>
