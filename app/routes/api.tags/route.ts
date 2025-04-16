@@ -1,9 +1,16 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { authenticate } from "app/shopify.server";
-import type { AdminTagResponse, ServerTagResponse } from "app/types/server";
+import type { AdminTagResponse, ServerTagData } from "app/types/server";
 import db from "../../db.server";
 import { ShopifyService } from "app/service/shopify_service.server";
+import { ServerResponse } from "app/libs/server_response";
 
+/*
+ * @description get all tags with pagination
+ * @method GET
+ * @route /api/tags?startCursor={startCursor}
+ * @param {number} startCursor - graphql cursor for pagination
+ */
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   try {
     const { admin } = await authenticate.admin(request);
@@ -48,7 +55,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       dbTags.push(...dbTagsResult.map((tag) => tag.name));
     }
 
-    const responseData: ServerTagResponse = {
+    return ServerResponse.success<ServerTagData>({
       data: {
         productTags: data.data.productTags.nodes.concat(dbTags),
         pageInfo: {
@@ -56,16 +63,12 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
           hasNextPage: data.data.productTags.pageInfo.hasNextPage,
         },
       },
-      status: "success",
-    };
-
-    return Response.json(responseData);
+      message: "Fetched tags successfully",
+    });
   } catch (error) {
     console.log("Error fetching tags:", (error as Error).message);
 
-    return Response.json({
-      status: "error",
-      message: "Failed to fetch tags",
+    return ServerResponse.error<ServerTagData>({
       data: {
         productTags: [],
         pageInfo: {
@@ -73,10 +76,17 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
           hasNextPage: false,
         },
       },
-    } as ServerTagResponse);
+      message: "Failed to fetch tags",
+    });
   }
 };
 
+/*
+ * @description create a new tag
+ * @method POST
+ * @route /api/tags
+ * @param {string} name - tag name
+ */
 export const action = async ({ request }: ActionFunctionArgs) => {
   try {
     if (request.method !== "POST") {

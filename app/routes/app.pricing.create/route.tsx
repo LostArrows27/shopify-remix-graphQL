@@ -44,6 +44,13 @@ export function links() {
   ];
 }
 
+/*
+ * @description create new pricing rule
+ * @method POST
+ * @route /api/pricing/create
+ * @param {string[]} selectedIds - selected ids from the form
+ * @param {PricingRuleFormData} ruleInformation - rule information from the form
+ */
 export async function action({ request }: ActionFunctionArgs) {
   try {
     if (request.method !== "POST") {
