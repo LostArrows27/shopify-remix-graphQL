@@ -10,18 +10,36 @@ import {
   TextField,
   Thumbnail,
 } from "@shopify/polaris";
-import { SearchIcon, ImageIcon, XIcon, ProductAddIcon } from "@shopify/polaris-icons";
+import {
+  SearchIcon,
+  ImageIcon,
+  XIcon,
+  ProductAddIcon,
+} from "@shopify/polaris-icons";
+import { usePickedEntityStore } from "app/hooks/use_picked_entity_store";
 import type { ProductType, SelectedType } from "app/types/app";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import { useDebounce } from "use-debounce";
 
-const SearchProduct = () => {
+interface ISearchProduct {
+  loading: boolean;
+}
+
+const SearchProduct = ({ loading }: ISearchProduct) => {
   const [selectedProductIds, setSelectedProductIds] = useState<SelectedType[]>(
     [],
   );
   const [query, setQuery] = useState<string>("");
 
   const [debouncedQuery] = useDebounce(query, 500);
+
+  const { selected, setSelected, error, setError } = usePickedEntityStore();
+
+  useLayoutEffect(() => {
+    if (selected.specific_products.length > 0) {
+      setSelectedProductIds(selected.specific_products);
+    }
+  }, [selected.specific_products]);
 
   useEffect(() => {
     if (!debouncedQuery) return;
@@ -45,18 +63,22 @@ const SearchProduct = () => {
 
       if (!response) return;
 
-      setSelectedProductIds(
-        (response as ProductType[]).map((product) => ({
-          id: product.id,
-          title: product.title,
-          imageUrl:
-            product.images.length > 0
-              ? product.images[0]?.originalSrc
-              : undefined,
-        })),
-      );
+      const products = (response as ProductType[]).map((product) => ({
+        id: product.id,
+        title: product.title,
+        imageUrl:
+          product.images.length > 0
+            ? product.images[0]?.originalSrc
+            : undefined,
+      }));
+
+      setSelectedProductIds(products);
+
+      setSelected("specific_products", products);
+
+      setError(null);
     },
-    [selectedProductIds],
+    [selectedProductIds, setError, setSelected],
   );
 
   return (
@@ -64,6 +86,12 @@ const SearchProduct = () => {
       <Box paddingBlockStart="200">
         <TextField
           label=""
+          disabled={loading}
+          error={
+            error && error?.type === "specific_products"
+              ? error.message
+              : undefined
+          }
           value={query}
           onChange={(value) => setQuery(value)}
           prefix={<Icon source={SearchIcon} tone="base" />}
@@ -75,6 +103,7 @@ const SearchProduct = () => {
               onClick={async () => {
                 await pickProduct();
               }}
+              disabled={loading}
             >
               Browse
             </Button>
@@ -110,6 +139,7 @@ const SearchProduct = () => {
               return (
                 <ResourceItem
                   id={item.id}
+                  disabled={loading}
                   url={""}
                   media={
                     <Thumbnail
@@ -135,10 +165,18 @@ const SearchProduct = () => {
                     <Button
                       variant="tertiary"
                       icon={XIcon}
+                      disabled={loading}
                       accessibilityLabel="Add theme"
                       onClick={() => {
                         setSelectedProductIds((prev) =>
                           prev.filter((product) => product.id !== item.id),
+                        );
+
+                        setSelected(
+                          "specific_products",
+                          selectedProductIds.filter(
+                            (product) => product.id !== item.id,
+                          ),
                         );
                       }}
                     />

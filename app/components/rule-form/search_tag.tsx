@@ -5,17 +5,22 @@ import {
   InlineStack,
   Box,
 } from "@shopify/polaris";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useLayoutEffect } from "react";
 import { PlusCircleIcon } from "@shopify/polaris-icons";
 import { titleCase } from "app/utils/title_case";
 import { TagsService } from "app/service/tags_service";
+import { usePickedEntityStore } from "app/hooks/use_picked_entity_store";
 
 type Option = {
   value: string;
   label: string;
 };
 
-function SearchTag() {
+interface ISearchTag {
+  loading: boolean;
+}
+
+function SearchTag({ loading }: ISearchTag) {
   const [deselectedOptions, setDeselectedOptions] = useState<Option[]>([]);
 
   const [startCursor, setStartCursor] = useState("cursor");
@@ -25,6 +30,8 @@ function SearchTag() {
   const [options, setOptions] = useState(deselectedOptions);
   const [isLoading, setIsLoading] = useState(false);
   const [willLoadMoreResults, setWillLoadMoreResults] = useState(true);
+
+  const { selected, setSelected, error, setError } = usePickedEntityStore();
 
   const fetchTags = useCallback(async () => {
     setIsLoading(true);
@@ -61,6 +68,12 @@ function SearchTag() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useLayoutEffect(() => {
+    if (selected.tags.length > 0) {
+      setSelectedOptions(selected.tags.map((tag) => tag.id));
+    }
+  }, [selected.tags]);
+
   const handleLoadMoreResults = useCallback(async () => {
     if (willLoadMoreResults && !isLoading) {
       await fetchTags();
@@ -72,8 +85,12 @@ function SearchTag() {
       const options = [...selectedOptions];
       options.splice(options.indexOf(tag), 1);
       setSelectedOptions(options);
+      setSelected(
+        "tags",
+        options.map((option) => ({ id: option, title: option })),
+      );
     },
-    [selectedOptions],
+    [selectedOptions, setSelected],
   );
 
   const updateText = useCallback(
@@ -98,6 +115,8 @@ function SearchTag() {
   const createTag = useCallback(async () => {
     if (
       inputValue === "" ||
+      inputValue.trim() === "" ||
+      loading ||
       deselectedOptions.map((option) => option.label).includes(inputValue)
     ) {
       return;
@@ -122,8 +141,35 @@ function SearchTag() {
         label: inputValue,
       },
     ]);
+
     setSelectedOptions((prev) => [...prev, inputValue]);
-  }, [deselectedOptions, inputValue]);
+    setSelected("tags", [
+      ...selectedOptions.map((option) => ({ id: option, title: option })),
+      { id: inputValue, title: inputValue },
+    ]);
+
+    setError(null);
+  }, [
+    deselectedOptions,
+    inputValue,
+    loading,
+    selectedOptions,
+    setError,
+    setSelected,
+  ]);
+
+  const handleSelect = useCallback(
+    (selected: string[]) => {
+      setSelectedOptions(selected);
+      setSelected(
+        "tags",
+        selected.map((option) => ({ id: option, title: option })),
+      );
+
+      setError(null);
+    },
+    [setError, setSelected],
+  );
 
   return (
     <Box paddingBlockStart={"100"}>
@@ -142,6 +188,10 @@ function SearchTag() {
           selected={selectedOptions}
           textField={
             <Autocomplete.TextField
+              disabled={loading}
+              error={
+                error && error?.type === "tags" ? error.message : undefined
+              }
               onChange={updateText}
               label=""
               value={inputValue}
@@ -149,7 +199,7 @@ function SearchTag() {
               autoComplete="on"
             />
           }
-          onSelect={setSelectedOptions}
+          onSelect={handleSelect}
           listTitle="Suggested Tags"
           loading={isLoading}
           onLoadMoreResults={handleLoadMoreResults}
@@ -162,7 +212,11 @@ function SearchTag() {
               tagLabel = option.replace("_", " ");
               tagLabel = titleCase(tagLabel);
               return (
-                <Tag key={`option${option}`} onRemove={removeTag(option)}>
+                <Tag
+                  disabled={loading}
+                  key={`option${option}`}
+                  onRemove={removeTag(option)}
+                >
                   {tagLabel}
                 </Tag>
               );

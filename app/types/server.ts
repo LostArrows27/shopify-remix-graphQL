@@ -22,4 +22,4 @@ export type ServerTagResponse = {
   message?: string;
 };
 
-export type ServerCreateTagResponse = Omit<ServerTagResponse, "data">;
+export type ServerCreateResponse = Omit<ServerTagResponse, "data">;

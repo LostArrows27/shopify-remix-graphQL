@@ -2,27 +2,7 @@ import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { authenticate } from "app/shopify.server";
 import type { AdminTagResponse, ServerTagResponse } from "app/types/server";
 import db from "../../db.server";
-import type { AdminApiContextWithoutRest } from "node_modules/@shopify/shopify-app-remix/dist/ts/server/clients/admin/types";
-
-const getShopifyAdminName = async (admin: AdminApiContextWithoutRest) => {
-  const response = await admin.graphql(
-    `#graphql
-      query shopInfo {
-          shop {
-            id
-          }
-      }
-    `,
-  );
-
-  const shopName = (await response.json()).data.shop.id;
-
-  if (!shopName) {
-    throw new Error("Shop not found");
-  }
-
-  return shopName as string;
-};
+import { ShopifyService } from "app/service/shopify_service.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   try {
@@ -57,7 +37,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     const dbTags: string[] = [];
 
     if (startCursor === "cursor") {
-      const shopName = await getShopifyAdminName(admin);
+      const shopName = await ShopifyService.getShopifyShopName(admin);
 
       const dbTagsResult = await db.shopifyTag.findMany({
         where: {
@@ -99,9 +79,13 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   try {
+    if (request.method !== "POST") {
+      throw new Error("Method not allowed");
+    }
+
     const { admin } = await authenticate.admin(request);
 
-    const shopName = await getShopifyAdminName(admin);
+    const shopName = await ShopifyService.getShopifyShopName(admin);
 
     if (!shopName) {
       throw new Error("Shop not found");

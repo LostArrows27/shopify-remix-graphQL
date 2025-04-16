@@ -16,17 +16,30 @@ import {
   XIcon,
   CollectionIcon,
 } from "@shopify/polaris-icons";
+import { usePickedEntityStore } from "app/hooks/use_picked_entity_store";
 import type { CollectionType, SelectedType } from "app/types/app";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import { useDebounce } from "use-debounce";
 
-const SearchCollection = () => {
+interface ISearchCollection {
+  loading: boolean;
+}
+
+const SearchCollection = ({ loading }: ISearchCollection) => {
   const [selectedCollectionIds, setSelectedCollectionIds] = useState<
     SelectedType[]
   >([]);
   const [query, setQuery] = useState<string>("");
 
   const [debouncedQuery] = useDebounce(query, 500);
+
+  const { selected, setSelected, error, setError } = usePickedEntityStore();
+
+  useLayoutEffect(() => {
+    if (selected.collections.length > 0) {
+      setSelectedCollectionIds(selected.collections);
+    }
+  }, [selected.collections]);
 
   useEffect(() => {
     if (!debouncedQuery) return;
@@ -50,15 +63,18 @@ const SearchCollection = () => {
 
       if (!response) return;
 
-      setSelectedCollectionIds(
-        (response as CollectionType[]).map((collection) => ({
-          id: collection.id,
-          title: collection.title,
-          imageUrl: collection.image ? collection.image.originalSrc : undefined,
-        })),
-      );
+      const collections = (response as CollectionType[]).map((collection) => ({
+        id: collection.id,
+        title: collection.title,
+        imageUrl: collection.image ? collection.image.originalSrc : undefined,
+      }));
+
+      setSelectedCollectionIds(collections);
+      setSelected("collections", collections);
+
+      setError(null);
     },
-    [selectedCollectionIds],
+    [selectedCollectionIds, setError, setSelected],
   );
 
   return (
@@ -66,6 +82,10 @@ const SearchCollection = () => {
       <Box paddingBlockStart="200">
         <TextField
           label=""
+          error={
+            error && error.type === "collections" ? error.message : undefined
+          }
+          disabled={loading}
           value={query}
           onChange={(value) => setQuery(value)}
           prefix={<Icon source={SearchIcon} tone="base" />}
@@ -74,6 +94,7 @@ const SearchCollection = () => {
           size="medium"
           connectedRight={
             <Button
+              disabled={loading}
               onClick={async () => {
                 await pickCollections();
               }}
@@ -111,6 +132,7 @@ const SearchCollection = () => {
             renderItem={(item) => {
               return (
                 <ResourceItem
+                  disabled={loading}
                   id={item.id}
                   url={""}
                   media={
@@ -138,12 +160,19 @@ const SearchCollection = () => {
                       variant="tertiary"
                       icon={XIcon}
                       accessibilityLabel="Add theme"
+                      disabled={loading}
                       onClick={() => {
                         setSelectedCollectionIds((prev) =>
                           prev.filter(
                             (collection) => collection.id !== item.id,
                           ),
                         );
+
+                        const newCollections = selectedCollectionIds.filter(
+                          (collection) => collection.id !== item.id,
+                        );
+
+                        setSelected("collections", newCollections);
                       }}
                     />
                   </div>
