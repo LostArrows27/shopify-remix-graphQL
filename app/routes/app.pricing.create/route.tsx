@@ -12,6 +12,7 @@ import {
   RadioButton,
   ChoiceList,
   Modal,
+  Badge,
 } from "@shopify/polaris";
 import SearchCollection from "app/components/rule-form/search_collection";
 import SearchProduct from "app/components/rule-form/search_product";
@@ -102,7 +103,7 @@ export const Create = () => {
   const {
     control,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isDirty },
     watch,
     clearErrors,
     trigger,
@@ -181,10 +182,15 @@ export const Create = () => {
   );
 
   useEffect(() => {
-    if (!!blocker.state && blocker.state === "blocked") {
+    if (!!blocker.state && blocker.state === "blocked" && isDirty) {
       toggleModal();
+      return;
     }
-  }, [blocker, toggleModal]);
+
+    if (blocker.state === "blocked" && !isDirty) {
+      blocker.proceed();
+    }
+  }, [blocker, isDirty, toggleModal]);
 
   // NOTE: clear errors when price type not %
   useEffect(() => {
@@ -215,6 +221,7 @@ export const Create = () => {
     <Page
       backAction={{ content: "Home", url: "/app" }}
       title="New Pricing Rule"
+      titleMetadata={<Badge tone="success">New</Badge>}
       primaryAction={{
         disabled: loading,
         content: "Save",
