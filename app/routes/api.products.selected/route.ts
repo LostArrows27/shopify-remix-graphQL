@@ -1,11 +1,8 @@
 import type { ActionFunctionArgs } from "@remix-run/node";
 import { ServerResponse } from "app/libs/server_response";
 import { authenticate } from "app/shopify.server";
-import type {
-  ProductData,
-  ProductResponseData,
-  ProductServerResponse,
-} from "app/types/server";
+import type { ProductResponseData } from "app/types/server";
+import { serverResponseWithProductPagination } from "app/utils/map_product_response";
 
 /**
  * @description get products information by ids
@@ -56,25 +53,17 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
     const data = (await response.json()).data as ProductResponseData;
 
-    const returnData: ProductData[] = data.nodes.map((product) => ({
-      title: product.title,
-      variants: product.variants.nodes.map((variant) => ({
-        title: variant.title,
-        price: parseFloat(variant.price),
-      })),
-      imageUrl: product.media.nodes[0]?.preview.image.url,
-    }));
-
-    return ServerResponse.success<ProductServerResponse>({
-      data: {
-        products: returnData,
-      },
+    return serverResponseWithProductPagination({
+      pageInfo: undefined,
+      products: data,
       message: "Products fetched successfully",
     });
   } catch (error) {
     console.log("Error fetching products:", error);
     return ServerResponse.error({
-      data: [],
+      data: {
+        products: [],
+      },
       message: "Failed to fetch products",
     });
   }

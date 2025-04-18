@@ -5,6 +5,7 @@ export class ProductService {
   static async getAppliedProducts(
     pricingRule: PricingRule,
     startCursor: string = "cursor",
+    tags: string[] = [],
   ): Promise<ProductPageData> {
     const selectedIds = pricingRule.ruleApplications.map(
       (ruleApplication) => ruleApplication.entityId,
@@ -38,9 +39,15 @@ export class ProductService {
           products: [],
         };
       case "tags":
-        return {
-          products: [],
-        };
+        const tagStr = encodeURIComponent(JSON.stringify(tags));
+
+        const tagRes = await fetch(
+          `/api/products/tags?startCursor=${startCursor}&tags=${tagStr}`,
+        );
+
+        const tagData = (await tagRes.json()) as ProductServerResponse;
+
+        return tagData.data;
       default:
         return {
           products: [],

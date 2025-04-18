@@ -76,9 +76,17 @@ export default function AppliedProductTable({
       const startCursor =
         cursor !== undefined ? cursor : currentPageData.pageInfo?.startCursor;
 
+      const tags =
+        pricingRule.applicationType === "tags"
+          ? pricingRule.ruleApplications.map(
+              (ruleApplication) => ruleApplication.entityId,
+            )
+          : [];
+
       const result = await ProductService.getAppliedProducts(
         pricingRule,
         startCursor,
+        tags,
       );
 
       const productPageData = {
@@ -257,22 +265,17 @@ export default function AppliedProductTable({
     );
   }
 
-  if (currentPageData.products.length === 0) {
-    return (
-      <LegacyCard>
-        <EmptyState
-          heading="No products found"
-          image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
-        >
-          <p>This rule doesn't have any products applied.</p>
-        </EmptyState>
-      </LegacyCard>
-    );
-  }
-
   return (
     <LegacyCard>
       <IndexTable
+        emptyState={
+          <EmptyState
+            heading="No products found"
+            image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
+          >
+            <p>This rule doesn't have any products applied.</p>
+          </EmptyState>
+        }
         loading={loading}
         selectable={false}
         resourceName={{
