@@ -1,60 +1,64 @@
 import { Modal, TitleBar } from "@shopify/app-bridge-react";
-import { Badge, BlockStack, Box, DescriptionList } from "@shopify/polaris";
-import type { PricingRule } from "app/types/app";
+import {
+  Badge,
+  BlockStack,
+  Box,
+  DescriptionList,
+  Text,
+} from "@shopify/polaris";
 import { RuleConversionUtils } from "app/utils/rule_conversion";
 import { format } from "date-fns";
 import AppliedProductTable from "./applied_product_table";
+import { useViewRuleModalStore } from "app/hooks/use_view_rule_modal";
 
-interface IViewRuleModalProps {
-  pricingRule: PricingRule | undefined;
-}
-const ViewRuleModal = ({ pricingRule }: IViewRuleModalProps) => {
-  if (!pricingRule) {
-    return null;
-  }
+const ViewRuleModal = () => {
+  const pricingRule = useViewRuleModalStore((state) => state.pricingRule);
 
-  const { name, status, createdAt, customPriceType, customPriceValue } =
-    pricingRule;
+  const closeModal = useViewRuleModalStore((state) => state.closeModal);
 
   return (
-    <Modal id="view-rule-modal" variant="large">
+    <Modal open={pricingRule != undefined} id="view-rule-modal" variant="large">
       <Box padding={"400"}>
         <BlockStack gap={"400"}>
           <DescriptionList
             items={[
               {
                 term: "Name",
-                description: name,
+                description: pricingRule?.name,
               },
               {
                 term: "Status",
                 description: (
-                  <Badge tone={status ? "success" : undefined}>
-                    {status ? "Enabled" : "Disabled"}
+                  <Badge tone={pricingRule?.status ? "success" : undefined}>
+                    {pricingRule?.status ? "Enabled" : "Disabled"}
                   </Badge>
                 ),
               },
               {
                 term: "Created at",
-                description: format(createdAt, "PPpp"),
+                description: format(
+                  pricingRule?.createdAt || Date.now(),
+                  "PPpp",
+                ),
               },
               {
                 term: "Discount description",
-                description: RuleConversionUtils.displayDiscountDescription(
-                  customPriceType,
-                  customPriceValue.toString(),
+                description: (
+                  <Text as="span" fontWeight="medium" tone="magic">
+                    {RuleConversionUtils.displayDiscountDescription(
+                      pricingRule?.customPriceType || "decrease_percentage",
+                      pricingRule?.customPriceValue.toString() || "0",
+                    )}
+                  </Text>
                 ),
               },
             ]}
           />
-          <AppliedProductTable pricingRule={pricingRule} />
+          {pricingRule && <AppliedProductTable pricingRule={pricingRule} />}
         </BlockStack>
       </Box>
       <TitleBar title="Pricing rule information">
-        <button
-          variant="primary"
-          onClick={() => shopify.modal.hide("view-rule-modal")}
-        >
+        <button variant="primary" onClick={() => closeModal()}>
           Done
         </button>
       </TitleBar>

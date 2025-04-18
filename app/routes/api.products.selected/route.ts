@@ -66,7 +66,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     }));
 
     return ServerResponse.success<ProductServerResponse>({
-      data: returnData,
+      data: {
+        products: returnData,
+      },
       message: "Products fetched successfully",
     });
   } catch (error) {

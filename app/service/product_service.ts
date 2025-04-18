@@ -1,17 +1,25 @@
 import type { PricingRule } from "app/types/app";
-import type { ProductData, ProductServerResponse } from "app/types/server";
+import type { ProductPageData, ProductServerResponse } from "app/types/server";
 
 export class ProductService {
   static async getAppliedProducts(
     pricingRule: PricingRule,
-  ): Promise<ProductData[]> {
+    startCursor: string = "cursor",
+  ): Promise<ProductPageData> {
     const selectedIds = pricingRule.ruleApplications.map(
       (ruleApplication) => ruleApplication.entityId,
     );
 
     switch (pricingRule.applicationType) {
       case "all":
-        return [];
+        const allProductRes = await fetch(
+          `/api/products/all?startCursor=${startCursor}`,
+        );
+
+        const allProductData =
+          (await allProductRes.json()) as ProductServerResponse;
+
+        return allProductData.data;
       case "specific_products":
         const form = new FormData();
 
@@ -26,11 +34,17 @@ export class ProductService {
 
         return data.data;
       case "collections":
-        return [];
+        return {
+          products: [],
+        };
       case "tags":
-        return [];
+        return {
+          products: [],
+        };
       default:
-        return [];
+        return {
+          products: [],
+        };
     }
   }
 }

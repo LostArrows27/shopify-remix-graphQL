@@ -9,14 +9,14 @@ import {
   EmptySearchResult,
 } from "@shopify/polaris";
 import { DeleteIcon, EditIcon, ViewIcon } from "@shopify/polaris-icons";
+import { useViewRuleModalStore } from "app/hooks/use_view_rule_modal";
 import type { PricingRule } from "app/types/app";
 import type { PageInfo, PricingRuleResponse } from "app/types/server";
 import { formatRelativeDate } from "app/utils/format_relative_date";
 import { RuleConversionUtils } from "app/utils/rule_conversion";
 import { useCallback, useEffect, useState } from "react";
-import ViewRuleModal from "./view_rule_modal";
 
-type PageData = {
+export type PageData = {
   pricingRules: PricingRule[];
   pageInfo: PageInfo;
 };
@@ -29,11 +29,9 @@ export function RuleListTable() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageCache, setPageCache] = useState<Record<number, PageData>>({});
 
-  const [choosenPricingRule, setChoosenPricingRule] = useState<
-    PricingRule | undefined
-  >(undefined);
-
   const fetcher = useFetcher();
+
+  const openModal = useViewRuleModalStore((state) => state.openModal);
 
   const loading = fetcher.state !== "idle";
 
@@ -144,9 +142,7 @@ export function RuleListTable() {
 
                       if (!selectedRule) return;
 
-                      setChoosenPricingRule(selectedRule);
-
-                      shopify.modal.show("view-rule-modal");
+                      openModal(selectedRule);
                     },
                   },
                   {
@@ -272,7 +268,6 @@ export function RuleListTable() {
           )}
         </IndexTable>
       </LegacyCard>
-      <ViewRuleModal pricingRule={choosenPricingRule} />
     </Box>
   );
 }

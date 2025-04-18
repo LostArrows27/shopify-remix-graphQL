@@ -7,14 +7,22 @@ export type ServerResponseType = {
   status: ResponseStatus;
 };
 
+export type ShopifyPageInfo = {
+  endCursor: string;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+};
+
+export type ServerPageInfo = {
+  startCursor: string;
+  hasNextPage: boolean;
+};
+
 export type AdminTagResponse = {
   data: {
     productTags: {
       nodes: string[];
-      pageInfo: {
-        endCursor: string;
-        hasNextPage: false;
-      };
+      pageInfo: ShopifyPageInfo;
     };
   };
 };
@@ -23,10 +31,7 @@ export type AdminTagResponse = {
 
 export type ServerTagData = {
   productTags: string[];
-  pageInfo: {
-    startCursor: string;
-    hasNextPage: boolean;
-  };
+  pageInfo: ServerPageInfo;
 } | null;
 
 export type ServerTagResponse = ServerResponseType & {
@@ -85,6 +90,17 @@ export type ProductData = {
   imageUrl: string;
 };
 
-export type ProductServerResponse = ServerResponseType & {
-  data: ProductData[];
+// all product API
+
+export type ProductPageInfo = ServerPageInfo & {
+  hasPreviousPage: boolean;
 };
+
+export type ProductServerResponse = ServerResponseType & {
+  data: {
+    products: ProductData[];
+    pageInfo?: ProductPageInfo;
+  };
+};
+
+export type ProductPageData = ProductServerResponse["data"];

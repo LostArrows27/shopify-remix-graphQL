@@ -2,6 +2,7 @@ import { Page } from "@shopify/polaris";
 import RuleListTable from "app/components/rule-list/rule_list_table";
 import { ExportIcon } from "@shopify/polaris-icons";
 import { useNavigate } from "@remix-run/react";
+import ViewRuleModal from "app/components/rule-list/view_rule_modal";
 
 const PricingRuleLists = () => {
   const navigate = useNavigate();
@@ -24,6 +25,7 @@ const PricingRuleLists = () => {
       ]}
     >
       <RuleListTable />
+      <ViewRuleModal />
     </Page>
   );
 };

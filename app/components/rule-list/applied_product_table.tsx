@@ -12,9 +12,9 @@ import { ImageIcon } from "@shopify/polaris-icons";
 import { useFormatCurrency } from "app/hooks/use_format_currency";
 import { ProductService } from "app/service/product_service";
 import type { PricingRule } from "app/types/app";
-import type { ProductData } from "app/types/server";
+import type { ProductPageData } from "app/types/server";
 import { RuleConversionUtils } from "app/utils/rule_conversion";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 
 interface IAppliedProductTableProps {
   pricingRule: PricingRule | undefined;
@@ -24,37 +24,114 @@ export default function AppliedProductTable({
   pricingRule,
 }: IAppliedProductTableProps) {
   const [loading, setLoading] = useState(false);
-  const [products, setProducts] = useState<ProductData[]>([]);
-  const [productsWithPosition, setProductsWithPosition] = useState<
-    (ProductData & { id: string; position: number })[]
-  >([]);
 
-  const { formatCurrency } = useFormatCurrency();
+  // pagination state
+  const [currentPageData, setCurrentPageData] = useState<ProductPageData>({
+    products: [],
+    pageInfo: {
+      hasNextPage: false,
+      hasPreviousPage: false,
+      startCursor: "cursor",
+    },
+  });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageCache, setPageCache] = useState<Record<number, ProductPageData>>(
+    {},
+  );
 
   useEffect(() => {
-    if (!pricingRule) return;
+    setCurrentPage(1);
+    setPageCache({});
+    setCurrentPageData({
+      products: [],
+      pageInfo: {
+        hasNextPage: false,
+        hasPreviousPage: false,
+        startCursor: "cursor",
+      },
+    });
 
-    const getProducts = async () => {
-      setLoading(true);
+    getProducts("cursor");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pricingRule]);
 
-      const result = await ProductService.getAppliedProducts(pricingRule);
-
-      setProducts(result);
-
-      const productsWithIds = result.map((product, index) => ({
+  const productsWithPosition = useMemo(
+    () =>
+      currentPageData.products.map((product, index) => ({
         ...product,
         id: `product-${index}`,
         position: index,
+      })),
+    [currentPageData],
+  );
+
+  const { formatCurrency } = useFormatCurrency();
+
+  const getProducts = useCallback(
+    async (cursor?: string) => {
+      if (!pricingRule) return;
+
+      setLoading(true);
+
+      const startCursor =
+        cursor !== undefined ? cursor : currentPageData.pageInfo?.startCursor;
+
+      const result = await ProductService.getAppliedProducts(
+        pricingRule,
+        startCursor,
+      );
+
+      const productPageData = {
+        products: result.products,
+        pageInfo: result?.pageInfo || {
+          hasNextPage: false,
+          hasPreviousPage: false,
+          startCursor: "cursor",
+        },
+      };
+
+      setCurrentPageData(productPageData);
+
+      setPageCache((prev) => ({
+        ...prev,
+        [currentPage]: productPageData,
       }));
-      setProductsWithPosition(productsWithIds);
 
       setLoading(false);
-    };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    },
+    [pricingRule, currentPage, currentPageData.pageInfo?.startCursor],
+  );
 
-    getProducts();
-  }, [pricingRule]);
+  useEffect(() => {
+    if (
+      !pricingRule ||
+      (currentPage === 1 && Object.keys(pageCache).length === 0)
+    ) {
+      return;
+    }
 
-  const rowMarkup = productsWithPosition.map((product, productIndex) => {
+    if (pageCache[currentPage]) {
+      setCurrentPageData(pageCache[currentPage]);
+    } else {
+      getProducts();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pricingRule, currentPage]);
+
+  const handleNextPage = useCallback(() => {
+    if (currentPageData.pageInfo?.hasNextPage) {
+      setCurrentPage((prev) => prev + 1);
+    }
+  }, [currentPageData.pageInfo?.hasNextPage]);
+
+  const handlePrevPage = useCallback(() => {
+    if (currentPageData.pageInfo?.hasPreviousPage) {
+      setCurrentPage((prev) => prev - 1);
+    }
+  }, [currentPageData.pageInfo?.hasPreviousPage]);
+
+  const rowMarkup = productsWithPosition.map((product) => {
     const productId = product.id;
     const position = product.position;
 
@@ -137,7 +214,7 @@ export default function AppliedProductTable({
                   alignment="end"
                   numeric
                 >
-                  {formatCurrency(discountedPrice)}
+                  {formatCurrency(discountedPrice, "explicit")}
                 </Text>
               </IndexTable.Cell>
             </IndexTable.Row>
@@ -180,7 +257,7 @@ export default function AppliedProductTable({
     );
   }
 
-  if (products.length === 0) {
+  if (currentPageData.products.length === 0) {
     return (
       <LegacyCard>
         <EmptyState
@@ -221,6 +298,16 @@ export default function AppliedProductTable({
             alignment: "end",
           },
         ]}
+        pagination={{
+          hasNext: loading
+            ? false
+            : currentPageData.pageInfo?.hasNextPage || false,
+          hasPrevious: loading
+            ? false
+            : currentPageData.pageInfo?.hasPreviousPage || false,
+          onNext: loading ? undefined : handleNextPage,
+          onPrevious: loading ? undefined : handlePrevPage,
+        }}
       >
         {rowMarkup}
       </IndexTable>
