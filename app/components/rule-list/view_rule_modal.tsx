@@ -54,13 +54,16 @@ const ViewRuleModal = () => {
                   </Badge>
                 ),
               },
-
               {
                 term: "Created at",
                 description: format(
                   pricingRule?.createdAt || Date.now(),
                   "PPpp",
                 ),
+              },
+              {
+                term: "Priority",
+                description: pricingRule?.priority.toString(),
               },
               {
                 term: "Applied to",
