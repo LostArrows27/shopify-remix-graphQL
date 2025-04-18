@@ -104,3 +104,12 @@ export type ProductServerResponse = ServerResponseType & {
 };
 
 export type ProductPageData = ProductServerResponse["data"];
+
+// collection name API
+
+export type CollectionNameResponse = {
+  data: string;
+};
+
+export type CollectionNameServerResponse = CollectionNameResponse &
+  ServerResponseType;

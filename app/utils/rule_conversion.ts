@@ -1,3 +1,4 @@
+import type { PricingRule } from "app/types/app";
 import type { AppliedProductType, CustomPriceType } from "app/types/enum";
 
 export class RuleConversionUtils {
@@ -92,5 +93,28 @@ export class RuleConversionUtils {
     }
 
     return value < 0 ? 0 : value;
+  }
+
+  static getAppliedProductTypeDescription(
+    pricingRule: PricingRule | undefined,
+  ) {
+    if (!pricingRule) {
+      return "No applied product type";
+    }
+
+    switch (pricingRule.applicationType) {
+      case "all":
+        return "All products";
+      case "specific_products":
+        return "Specific products";
+      case "collections":
+        return `Collection with ID: ${pricingRule.ruleApplications[0].entityId.split("/").pop() || ""}`;
+      case "tags":
+        return `Product with tags: ${pricingRule.ruleApplications
+          .map((rule) => rule.entityId)
+          .join(", ")}`;
+      default:
+        return "Other";
+    }
   }
 }
