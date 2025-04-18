@@ -83,10 +83,16 @@ export default function AppliedProductTable({
             )
           : [];
 
+      const collectionId =
+        pricingRule.applicationType === "collections"
+          ? pricingRule.ruleApplications[0].entityId
+          : "";
+
       const result = await ProductService.getAppliedProducts(
         pricingRule,
         startCursor,
         tags,
+        collectionId,
       );
 
       const productPageData = {
@@ -211,7 +217,8 @@ export default function AppliedProductTable({
               </IndexTable.Cell>
               <IndexTable.Cell>
                 <Text as="span" alignment="end" numeric>
-                  -{formatCurrency(savings)}
+                  {savings > 0 ? "-" : "+"}
+                  {formatCurrency(savings < 0 ? -savings : savings)}
                 </Text>
               </IndexTable.Cell>
               <IndexTable.Cell>

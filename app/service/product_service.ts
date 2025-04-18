@@ -6,6 +6,7 @@ export class ProductService {
     pricingRule: PricingRule,
     startCursor: string = "cursor",
     tags: string[] = [],
+    collectionID: string = "",
   ): Promise<ProductPageData> {
     const selectedIds = pricingRule.ruleApplications.map(
       (ruleApplication) => ruleApplication.entityId,
@@ -35,9 +36,14 @@ export class ProductService {
 
         return data.data;
       case "collections":
-        return {
-          products: [],
-        };
+        const collectionResult = await fetch(
+          `/api/products/collection/${encodeURIComponent(collectionID)}?startCursor=${startCursor}`,
+        );
+
+        const collectionData =
+          (await collectionResult.json()) as ProductServerResponse;
+
+        return collectionData.data;
       case "tags":
         const tagStr = encodeURIComponent(JSON.stringify(tags));
 
