@@ -3,7 +3,7 @@
 client_id = "ce0c38d8f32341b95bf6652357bc1207"
 name = "dungnt-2"
 handle = "dungnt-2"
-application_url = "https://expo-nano-introduces-prescribed.trycloudflare.com"
+application_url = "https://atom-newbie-essays-promotions.trycloudflare.com"
 embedded = true
 
 [build]
@@ -34,9 +34,9 @@ read_price_rules,write_price_rules,
 
 [auth]
 redirect_urls = [
-  "https://expo-nano-introduces-prescribed.trycloudflare.com/auth/callback",
-  "https://expo-nano-introduces-prescribed.trycloudflare.com/auth/shopify/callback",
-  "https://expo-nano-introduces-prescribed.trycloudflare.com/api/auth/callback"
+  "https://atom-newbie-essays-promotions.trycloudflare.com/auth/callback",
+  "https://atom-newbie-essays-promotions.trycloudflare.com/auth/shopify/callback",
+  "https://atom-newbie-essays-promotions.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]

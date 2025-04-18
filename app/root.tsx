@@ -16,6 +16,13 @@ import { AppProvider } from "@shopify/shopify-app-remix/react";
 import { NavMenu } from "@shopify/app-bridge-react";
 import { cssBundleHref } from "@remix-run/css-bundle";
 
+import { I18nContext, I18nManager } from "@shopify/react-i18n";
+
+const locale = "en";
+const i18nManager = new I18nManager({
+  locale,
+});
+
 export const links = () => [
   ...(cssBundleHref ? [{ rel: "stylesheet", href: cssBundleHref }] : []),
   { rel: "stylesheet", href: polarisStyles },
@@ -44,15 +51,18 @@ export default function App() {
         <Links />
       </head>
       <body>
-        <AppProvider isEmbeddedApp apiKey={apiKey}>
-          <NavMenu>
-            <Link to="/app" rel="home">
-              Home
-            </Link>
-            <Link to="/app/pricing/create">Create rules</Link>
-          </NavMenu>
-          <Outlet />
-        </AppProvider>
+        <I18nContext.Provider value={i18nManager}>
+          <AppProvider isEmbeddedApp apiKey={apiKey}>
+            <NavMenu>
+              <Link to="/app" rel="home">
+                Home
+              </Link>
+              <Link to="/app/pricing/list">View all rules</Link>
+              <Link to="/app/pricing/create">Create pricing rules</Link>
+            </NavMenu>
+            <Outlet />
+          </AppProvider>
+        </I18nContext.Provider>
         <ScrollRestoration />
         <Scripts />
       </body>

@@ -1,11 +1,11 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { authenticate } from "app/shopify.server";
-import type { AdminTagResponse, ServerTagData } from "app/types/server";
+import type { AdminTagResponse, ServerTagResponse } from "app/types/server";
 import db from "../../db.server";
 import { ShopifyService } from "app/service/shopify_service.server";
 import { ServerResponse } from "app/libs/server_response";
 
-/*
+/**
  * @description get all tags with pagination
  * @method GET
  * @route /api/tags?startCursor={startCursor}
@@ -55,7 +55,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       dbTags.push(...dbTagsResult.map((tag) => tag.name));
     }
 
-    return ServerResponse.success<ServerTagData>({
+    return ServerResponse.success<ServerTagResponse>({
       data: {
         productTags: data.data.productTags.nodes.concat(dbTags),
         pageInfo: {
@@ -68,7 +68,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   } catch (error) {
     console.log("Error fetching tags:", (error as Error).message);
 
-    return ServerResponse.error<ServerTagData>({
+    return ServerResponse.error<ServerTagResponse>({
       data: {
         productTags: [],
         pageInfo: {
@@ -81,7 +81,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   }
 };
 
-/*
+/**
  * @description create a new tag
  * @method POST
  * @route /api/tags
@@ -116,15 +116,15 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       },
     });
 
-    return Response.json({
-      status: "success",
+    return ServerResponse.success<ServerTagResponse>({
+      data: null,
       message: "Tag created successfully",
     });
   } catch (error) {
     console.log("Error creating tag:", (error as Error).message);
 
-    return Response.json({
-      status: "error",
+    return ServerResponse.error<ServerTagResponse>({
+      data: null,
       message: "Failed to create tag",
     });
   }

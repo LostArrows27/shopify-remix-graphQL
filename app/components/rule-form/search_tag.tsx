@@ -43,6 +43,11 @@ function SearchTag({ loading }: ISearchTag) {
       return;
     }
 
+    if (!data?.data || !data?.data?.productTags) {
+      setIsLoading(false);
+      return;
+    }
+
     const newOptions = data.data.productTags.map((tag) => ({
       value: tag,
       label: tag,

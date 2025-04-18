@@ -1,9 +1,9 @@
 export class ServerResponse {
-  static success<T>({
+  static success<T extends { data: any }>({
     data,
     message = "Success",
   }: {
-    data: T;
+    data: T["data"];
     message?: string;
   }) {
     return Response.json({
@@ -13,11 +13,11 @@ export class ServerResponse {
     });
   }
 
-  static error<T>({
+  static error<T extends { data: any }>({
     data = null,
     message = "Error",
   }: {
-    data?: T | null;
+    data?: T["data"] | null;
     message?: string;
   }) {
     return Response.json({

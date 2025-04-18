@@ -1,8 +1,48 @@
-import type { PricingRuleFormData } from "app/types/app";
-
+import type { PricingRule, PricingRuleFormData } from "app/types/app";
 import db from "../db.server";
+import type { PricingRulePageData } from "app/types/server";
 
 export class PricingRuleService {
+  static RULES_PAGE_LIMIT = 25;
+
+  static async getPaginatedPricingRules(
+    page: number,
+    shopName: string,
+  ): Promise<PricingRulePageData> {
+    try {
+      const offset = (page - 1) * this.RULES_PAGE_LIMIT;
+
+      const [totalCount, pricingRules] = (await Promise.all([
+        db.pricingRule.count(),
+        db.pricingRule.findMany({
+          skip: offset, // skip -> first pos to start
+          take: this.RULES_PAGE_LIMIT, // take -> number of items to take (from first pos)
+          orderBy: {
+            createdAt: "desc",
+          },
+          where: {
+            shop: shopName,
+          },
+          include: {
+            ruleApplications: true,
+          },
+        }),
+      ])) as unknown as [number, PricingRule[]];
+
+      return {
+        pageInfo: {
+          total: totalCount,
+          page: page,
+          hasNext: totalCount > offset + this.RULES_PAGE_LIMIT,
+          hasPrevious: page > 1,
+        },
+        pricingRules,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
   static async createPricingRule(
     selectedIds: string[],
     ruleInformation: PricingRuleFormData,

@@ -44,7 +44,7 @@ export function links() {
   ];
 }
 
-/*
+/**
  * @description create new pricing rule
  * @method POST
  * @route /api/pricing/create
@@ -226,7 +226,7 @@ export const Create = () => {
 
   return (
     <Page
-      backAction={{ content: "Home", url: "/app" }}
+      backAction={{ content: "Home", url: "/app/pricing/list" }}
       title="New Pricing Rule"
       titleMetadata={<Badge tone="success">New</Badge>}
       primaryAction={{
