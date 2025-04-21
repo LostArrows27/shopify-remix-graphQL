@@ -4,6 +4,7 @@ import type { AdminTagResponse, ServerTagResponse } from "app/types/server";
 import db from "../../db.server";
 import { ShopifyService } from "app/service/shopify_service.server";
 import { ServerResponse } from "app/libs/server_response";
+import { GraphQlQueryService } from "app/service/graphql_query_service.server";
 
 /**
  * @description get all tags with pagination
@@ -23,18 +24,9 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       throw new Error("Missing required parameters: startCursor");
     }
 
-    const response = await admin.graphql(
-      `#graphql
-        query {
-          productTags(first: 10 ${startCursor != "cursor" ? `, after: "${startCursor}"` : ""}) {
-              nodes,
-              pageInfo {
-                endCursor,
-                hasNextPage,
-              }
-          }
-        }
-    `,
+    const response = await GraphQlQueryService.queryProductTags(
+      admin,
+      startCursor,
     );
 
     const data = (await response.json()) as AdminTagResponse;

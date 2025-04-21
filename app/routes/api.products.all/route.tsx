@@ -1,8 +1,10 @@
 import type { LoaderFunctionArgs } from "@remix-run/node";
 import { ServerResponse } from "app/libs/server_response";
+import { GraphQlQueryService } from "app/service/graphql_query_service.server";
 import { authenticate } from "app/shopify.server";
 import type { ProductResponseData, ShopifyPageInfo } from "app/types/server";
 import { serverResponseWithProductPagination } from "app/utils/map_product_response";
+
 /**
  * @description get all products information with pagination
  * @method GET
@@ -21,38 +23,9 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       throw new Error("Missing required parameters: startCursor");
     }
 
-    const response = await admin.graphql(
-      `#graphql
-            query {
-                products(first: 7 ${startCursor != "cursor" ? `, after: "${startCursor}"` : ""}) {
-                    nodes {
-                        id
-                        title
-                        variants(first: 10) {
-                            nodes {
-                                id
-                                title
-                                price
-                            }
-                        }
-                        media(first: 1) {
-                            nodes {
-                                preview {
-                                    image {
-                                        url
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    pageInfo {
-                        endCursor
-                        hasNextPage
-                        hasPreviousPage
-                    }
-                }
-            }
-        `,
+    const response = await GraphQlQueryService.queryProductWithMedia(
+      admin,
+      startCursor,
     );
 
     const result = (await response.json()).data;

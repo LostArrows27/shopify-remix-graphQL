@@ -1,0 +1,16 @@
+.product-name .product-button, 
+.product-action .product-popover
+{
+   opacity: 0;
+   --p-motion-ease: cubic-bezier(.25, .1, .25, 1);
+   transition: opacity var(--p-motion-ease) .2s;
+}
+
+.product-name:hover .product-button,
+.product-action:hover .product-popover
+{
+    opacity: 1;
+    cursor: pointer;
+}
+
+

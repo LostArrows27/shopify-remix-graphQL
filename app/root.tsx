@@ -59,6 +59,7 @@ export default function App() {
               </Link>
               <Link to="/app/pricing/list">View all rules</Link>
               <Link to="/app/pricing/create">Create pricing rules</Link>
+              <Link to="/app/pricing/affected-products">Affected products</Link>
             </NavMenu>
             <Outlet />
           </AppProvider>

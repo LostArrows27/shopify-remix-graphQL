@@ -1,5 +1,6 @@
 import type { ActionFunctionArgs } from "@remix-run/node";
 import { ServerResponse } from "app/libs/server_response";
+import { GraphQlQueryService } from "app/service/graphql_query_service.server";
 import { authenticate } from "app/shopify.server";
 import type { ProductResponseData } from "app/types/server";
 import { serverResponseWithProductPagination } from "app/utils/map_product_response";
@@ -19,36 +20,11 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
     const selectedIds = JSON.parse(form.get("ids") as string);
 
-    const idsForQuery = selectedIds.map((id: string) => `"${id}"`).join(", ");
-
     const { admin } = await authenticate.admin(request);
 
-    const response = await admin.graphql(
-      `#graphql
-        query GetProductsByIds {
-          nodes(ids: [${idsForQuery}]) {
-            id
-            ... on Product {
-              title
-              variants(first: 10) {
-                nodes {
-                  title
-                  price
-                }
-              }
-              media(first: 1) {
-                nodes {
-                  preview {
-                    image {
-                      url
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      `,
+    const response = await GraphQlQueryService.queryProductByIds(
+      admin,
+      selectedIds,
     );
 
     const data = (await response.json()).data as ProductResponseData;

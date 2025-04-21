@@ -1,5 +1,6 @@
 import type { LoaderFunctionArgs } from "@remix-run/node";
 import { ServerResponse } from "app/libs/server_response";
+import { GraphQlQueryService } from "app/service/graphql_query_service.server";
 import { authenticate } from "app/shopify.server";
 import type { CollectionNameResponse } from "app/types/server";
 
@@ -17,14 +18,9 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
 
     const { admin } = await authenticate.admin(request);
 
-    const response = await admin.graphql(
-      `#graphql
-          query {
-              collection (id: "${collectionId}") {
-                  title
-              }
-          }
-      `,
+    const response = await GraphQlQueryService.queryCollectionName(
+      admin,
+      collectionId,
     );
 
     const data = await response.json();
