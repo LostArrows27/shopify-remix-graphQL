@@ -1,5 +1,9 @@
 import type { PricingRule } from "app/types/app";
-import type { ProductPageData, ProductServerResponse } from "app/types/server";
+import type {
+  AffectedProductServerResponse,
+  ProductPageData,
+  ProductServerResponse,
+} from "app/types/server";
 
 export class ProductService {
   static async getAppliedProducts(
@@ -59,5 +63,15 @@ export class ProductService {
           products: [],
         };
     }
+  }
+
+  static async getAffectedProductsWithRule(
+    startCursor: string = "cursor",
+  ): Promise<AffectedProductServerResponse["data"]> {
+    const result = await fetch(`/api/affected?startCursor=${startCursor}`);
+
+    const data = (await result.json()) as AffectedProductServerResponse;
+
+    return data.data;
   }
 }

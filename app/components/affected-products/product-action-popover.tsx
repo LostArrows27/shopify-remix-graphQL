@@ -3,13 +3,25 @@ import { useState, useCallback } from "react";
 import { MenuHorizontalIcon } from "@shopify/polaris-icons";
 import style from "./style.module.css";
 
-function ProductActionPopover() {
-  const [popoverActive, setPopoverActive] = useState(true);
+import type { AffectedProductWithRuleData } from "app/types/server";
+import { useRedirectToProductPage } from "app/hooks/use_redirect_to_product_page";
+import { useAffectedRuleModal } from "app/hooks/use_affected_rule_modal";
+
+interface IProductActionPopover {
+  product: AffectedProductWithRuleData[number];
+}
+
+function ProductActionPopover({ product }: IProductActionPopover) {
+  const [popoverActive, setPopoverActive] = useState(false);
+
+  const openModal = useAffectedRuleModal((state) => state.openModal);
 
   const togglePopoverActive = useCallback(
     () => setPopoverActive((popoverActive) => !popoverActive),
     [],
   );
+
+  const { redirect } = useRedirectToProductPage(product.product.id);
 
   return (
     <div
@@ -33,8 +45,20 @@ function ProductActionPopover() {
         <ActionList
           actionRole="menuitem"
           items={[
-            { content: "View affected rules" },
-            { content: "View product page" },
+            {
+              content: "View affected rules",
+              onAction: () => {
+                openModal(product);
+                togglePopoverActive();
+              },
+            },
+            {
+              content: "View product page",
+              onAction: () => {
+                redirect();
+                togglePopoverActive();
+              },
+            },
           ]}
         />
       </Popover>

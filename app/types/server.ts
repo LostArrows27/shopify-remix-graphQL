@@ -155,3 +155,4 @@ export type AffectedProductServerResponse = ServerResponseType & {
     pageInfo: ProductPageInfo;
   };
 };
+

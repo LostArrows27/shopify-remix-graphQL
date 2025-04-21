@@ -175,6 +175,7 @@ export class PricingRuleService {
           )
           .map((rule) => ({
             id: rule.id,
+            name: rule.name,
             priority: rule.priority,
             createdAt: rule.createdAt,
             status: rule.status,
