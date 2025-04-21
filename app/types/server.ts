@@ -1,3 +1,4 @@
+import type { PricingRuleService } from "app/service/pricing_rule_service.server";
 import type { PricingRule } from "./app";
 
 export type ResponseStatus = "success" | "error";
@@ -5,6 +6,16 @@ export type ResponseStatus = "success" | "error";
 export type ServerResponseType = {
   message: string;
   status: ResponseStatus;
+};
+
+export type ProductMedia = {
+  nodes: {
+    preview: {
+      image: {
+        url: string;
+      };
+    };
+  }[];
 };
 
 export type ShopifyPageInfo = {
@@ -69,15 +80,7 @@ export type ProductResponseData = {
         price: string;
       }[];
     };
-    media: {
-      nodes: {
-        preview: {
-          image: {
-            url: string;
-          };
-        };
-      }[];
-    };
+    media: ProductMedia;
   }[];
 };
 
@@ -113,3 +116,42 @@ export type CollectionNameResponse = {
 
 export type CollectionNameServerResponse = CollectionNameResponse &
   ServerResponseType;
+
+// effected product API
+export type AffectedProduct = {
+  id: string;
+  title: string;
+  variants: {
+    nodes: {
+      id: string;
+      title: string;
+      price: string;
+    }[];
+  };
+  media: ProductMedia;
+  collections: {
+    nodes: {
+      id: string;
+      title: string;
+    }[];
+  };
+  tags: string[];
+};
+
+export type AffectedProductResponse = {
+  products: {
+    nodes: AffectedProduct[];
+    pageInfo: ShopifyPageInfo;
+  };
+};
+
+export type AffectedProductWithRuleData = Awaited<
+  ReturnType<typeof PricingRuleService.getAffectedRules>
+>;
+
+export type AffectedProductServerResponse = ServerResponseType & {
+  data: {
+    products: AffectedProductWithRuleData;
+    pageInfo: ProductPageInfo;
+  };
+};

@@ -19,6 +19,15 @@ export class GraphQlQueryService {
                                         price
                                     }
                                 }
+                                media(first: 1) {
+                                    nodes {
+                                        preview {
+                                            image {
+                                                url
+                                            }
+                                        }
+                                    }
+                                }
                                 collections(first: 20) {
                                   nodes {
                                       id

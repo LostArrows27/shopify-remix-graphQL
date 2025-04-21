@@ -3,7 +3,7 @@
 client_id = "ce0c38d8f32341b95bf6652357bc1207"
 name = "dungnt-2"
 handle = "dungnt-2"
-application_url = "https://ing-area-reuters-decisions.trycloudflare.com"
+application_url = "https://photos-springs-nursery-gmc.trycloudflare.com"
 embedded = true
 
 [build]
@@ -34,9 +34,9 @@ read_price_rules,write_price_rules,
 
 [auth]
 redirect_urls = [
-  "https://ing-area-reuters-decisions.trycloudflare.com/auth/callback",
-  "https://ing-area-reuters-decisions.trycloudflare.com/auth/shopify/callback",
-  "https://ing-area-reuters-decisions.trycloudflare.com/api/auth/callback"
+  "https://photos-springs-nursery-gmc.trycloudflare.com/auth/callback",
+  "https://photos-springs-nursery-gmc.trycloudflare.com/auth/shopify/callback",
+  "https://photos-springs-nursery-gmc.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]
