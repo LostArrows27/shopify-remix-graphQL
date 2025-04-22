@@ -6,6 +6,7 @@ import style from "./style.module.css";
 import type { AffectedProductWithRuleData } from "app/types/server";
 import { useRedirectToProductPage } from "app/hooks/use_redirect_to_product_page";
 import { useAffectedRuleModal } from "app/hooks/use_affected_rule_modal";
+import { useActiveRuleModal } from "app/hooks/use_active_rule_modal";
 
 interface IProductActionPopover {
   product: AffectedProductWithRuleData[number];
@@ -14,7 +15,11 @@ interface IProductActionPopover {
 function ProductActionPopover({ product }: IProductActionPopover) {
   const [popoverActive, setPopoverActive] = useState(false);
 
-  const openModal = useAffectedRuleModal((state) => state.openModal);
+  const openAffectedRuleModal = useAffectedRuleModal(
+    (state) => state.openModal,
+  );
+
+  const openActiveRulesModal = useActiveRuleModal((state) => state.openModal);
 
   const togglePopoverActive = useCallback(
     () => setPopoverActive((popoverActive) => !popoverActive),
@@ -48,13 +53,14 @@ function ProductActionPopover({ product }: IProductActionPopover) {
             {
               content: "View rule priority",
               onAction: () => {
+                openActiveRulesModal(product.rules);
                 togglePopoverActive();
               },
             },
             {
               content: "Check variant pricing",
               onAction: () => {
-                openModal(product);
+                openAffectedRuleModal(product);
                 togglePopoverActive();
               },
             },

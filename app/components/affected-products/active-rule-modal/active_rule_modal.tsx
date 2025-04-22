@@ -1,36 +1,30 @@
 import { Modal, TitleBar } from "@shopify/app-bridge-react";
 import { BlockStack, Box, EmptyState, Text } from "@shopify/polaris";
-import RuleDescription from "app/components/rule-description";
-import { useAffectedRuleModal } from "app/hooks/use_affected_rule_modal";
-import RuleProductTable from "./rule_product_table";
+import { useActiveRuleModal } from "app/hooks/use_active_rule_modal";
+import ActiveRuleListTable from "./active_rule_list_table";
 import { useNavigate } from "@remix-run/react";
 
-const AffectedRuleModal = () => {
-  const productData = useAffectedRuleModal((state) => state.productData);
+const ActiveRuleModal = () => {
+  const pricingRules = useActiveRuleModal((state) => state.pricingRules);
 
-  const closeModal = useAffectedRuleModal((state) => state.closeModal);
+  const closeModal = useActiveRuleModal((state) => state.closeModal);
 
-  const haveRules = productData && productData?.rules.length > 0;
+  const haveRules = pricingRules && pricingRules?.length > 0;
 
   const navigator = useNavigate();
 
   return (
-    <Modal variant="large" open={!!productData} id="affected-rule-modal">
+    <Modal variant="large" open={!!pricingRules} id="active-rule-modal">
       {haveRules ? (
-        <Box padding={"400"}>
-          <BlockStack gap={"400"}>
-            <RuleDescription pricingRule={productData?.rules[0]} />
-            <RuleProductTable
-              pricingType={productData?.rules[0]!.customPriceType}
-              pricingValue={productData?.rules[0]!.customPriceValue.toString()}
-              product={productData.product}
-            />
+        <Box paddingBlock={"500"}>
+          <BlockStack gap={"500"}>
+            <ActiveRuleListTable rules={pricingRules} />
           </BlockStack>
         </Box>
       ) : (
         <EmptyState
           image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
-          heading="No affected rules"
+          heading="No active rules"
           action={{
             content: "View rules list",
             onAction: () => {
@@ -46,12 +40,12 @@ const AffectedRuleModal = () => {
           }}
         >
           <Text as={"p"} variant="bodyMd" fontWeight="regular">
-            This product does not have any affected rules. Please check the
+            This product does not have any active rules. Please check the
             product details to see if there are any other issues.
           </Text>
         </EmptyState>
       )}
-      <TitleBar title="Affected Rule">
+      <TitleBar title="Active Rules">
         {haveRules && (
           <button variant="primary" onClick={() => closeModal()}>
             Done
@@ -62,4 +56,4 @@ const AffectedRuleModal = () => {
   );
 };
 
-export default AffectedRuleModal;
+export default ActiveRuleModal;
