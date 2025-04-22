@@ -145,7 +145,7 @@ const AffectedProductTable = () => {
               position={index}
             >
               <IndexTable.Cell scope="row">
-                <Box padding="150">
+                <Box padding="100">
                   <div
                     style={{
                       display: "flex",

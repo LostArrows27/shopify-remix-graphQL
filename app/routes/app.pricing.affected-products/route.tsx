@@ -1,6 +1,6 @@
 import { Page } from "@shopify/polaris";
-import AffectedProductTable from "app/components/affected-products/affected_product_table";
-import AffectedRuleModal from "app/components/affected-products/affected_rule_modal";
+import AffectedProductTable from "app/components/affected-products/afftected-product-table/affected_product_table";
+import AffectedRuleModal from "app/components/affected-products/affected-rule-modal/affected_rule_modal";
 
 const AffectedProducts = () => {
   return (

@@ -46,14 +46,20 @@ function ProductActionPopover({ product }: IProductActionPopover) {
           actionRole="menuitem"
           items={[
             {
-              content: "View affected rules",
+              content: "View rule priority",
+              onAction: () => {
+                togglePopoverActive();
+              },
+            },
+            {
+              content: "Check variant pricing",
               onAction: () => {
                 openModal(product);
                 togglePopoverActive();
               },
             },
             {
-              content: "View product page",
+              content: "Edit product details",
               onAction: () => {
                 redirect();
                 togglePopoverActive();

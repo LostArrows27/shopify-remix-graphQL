@@ -151,38 +151,27 @@ export class PricingRuleService {
 
       return products.map((product) => ({
         product,
-        rules: potentialRule
-          .filter(
-            (rule) =>
-              rule.applicationType === "all" ||
-              rule.ruleApplications.some(
-                (app) =>
-                  app.entityType === "tags" &&
-                  product.tags.includes(app.entityId),
-              ) ||
-              rule.ruleApplications.some(
-                (app) =>
-                  app.entityType === "collections" &&
-                  product.collections.nodes
-                    .map((collection) => collection.id)
-                    .includes(app.entityId),
-              ) ||
-              rule.ruleApplications.some(
-                (app) =>
-                  app.entityType === "specific_products" &&
-                  app.entityId === product.id,
-              ),
-          )
-          .map((rule) => ({
-            id: rule.id,
-            name: rule.name,
-            priority: rule.priority,
-            createdAt: rule.createdAt,
-            status: rule.status,
-            applicationType: rule.applicationType,
-            customPriceType: rule.customPriceType,
-            customPriceValue: parseInt(rule.customPriceValue.toString(), 10),
-          })),
+        rules: potentialRule.filter(
+          (rule) =>
+            rule.applicationType === "all" ||
+            rule.ruleApplications.some(
+              (app) =>
+                app.entityType === "tags" &&
+                product.tags.includes(app.entityId),
+            ) ||
+            rule.ruleApplications.some(
+              (app) =>
+                app.entityType === "collections" &&
+                product.collections.nodes
+                  .map((collection) => collection.id)
+                  .includes(app.entityId),
+            ) ||
+            rule.ruleApplications.some(
+              (app) =>
+                app.entityType === "specific_products" &&
+                app.entityId === product.id,
+            ),
+        ),
       }));
     } catch (error) {
       throw error;
